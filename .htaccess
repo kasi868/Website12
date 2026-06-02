@@ -1,0 +1,17 @@
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+
+RewriteBase /rioadagency/
+
+# Home page
+RewriteRule ^$ index.php [L]
+RewriteRule ^index/?$ index.php [L]
+RewriteRule ^home/?$ index.php [L]
+
+# Blog routes
+RewriteRule ^blog/([a-zA-Z0-9-]+)/?$ blog-details.php?slug=$1 [L,QSA]
+
+# Dynamic CMS pages
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ dynamic-page.php?slug=$1 [L,QSA]

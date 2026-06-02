@@ -1,0 +1,53 @@
+Desktop size
+slider-
+width : 1600 px
+height : 821 px
+
+services - 
+width: 	570 px
+height: 353 px
+
+about us -
+width :585 px
+height :509 px 
+
+portfolio same as about us
+
+what we do -
+width:500 px
+height: 576 px
+
+why choose us-
+width:370 px
+height :260 px
+
+blog -
+Height:370px
+width:250 px
+
+Mobile size
+slider-
+width : 1080 px
+height : 450 px
+
+services - 
+width: 	570 px
+height: 353 px
+
+about us -
+width :585 px
+height :509 px 
+
+portfolio same as about us
+
+what we do -
+width:500 px
+height: 576 px
+
+why choose us-
+width:370 px
+height :260 px
+
+blog -
+Height:370px
+width:250 px

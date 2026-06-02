@@ -1,0 +1,57 @@
+<?php
+require_once __DIR__ . '/config/bootstrap.php';
+require_once __DIR__ . '/includes/layout.php';
+
+$slug = isset($_GET['slug']) ? $_GET['slug'] : '';
+$blog = fetch_blog($conn, $slug);
+if (!$blog) {
+    $allBlogs = fetch_blogs($conn, 1);
+    $blog = $allBlogs ? $allBlogs[0] : null;
+}
+if (!$blog) {
+    http_response_code(404);
+    echo 'Blog not found.';
+    exit;
+}
+
+$metaTitle = value($blog, 'meta_title', $blog['title']);
+$metaDescription = value($blog, 'meta_description', excerpt_text(value($blog, 'intro_text', $blog['content']), 150));
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head><?php include __DIR__ . '/includes/head-common.php'; ?></head>
+<body>
+<div class="page-wrapper">
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    
+
+    <section class="blog-details">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="blog-details__left">
+                        <div class="blog-details__img">
+                            <img src="<?= h(media_url(value($blog, 'image', 'assets/images/blog/blog-1-1.jpg'))) ?>" alt="<?= h(value($blog, 'image_alt', $blog['title'])) ?>">
+                        </div>
+                        <div class="blog-details__content">
+                            <h3><?= h($blog['title']) ?></h3>
+                            <?php if (!empty($blog['subtitle'])) { ?><p><strong><?= h($blog['subtitle']) ?></strong></p><?php } ?>
+                            <div><?= render_content(value($blog, 'intro_text')) ?></div>
+                            <div><?= render_content(value($blog, 'content')) ?></div>
+                            <?php if (!empty($blog['conclusion'])) { ?><blockquote><?= render_content($blog['conclusion']) ?></blockquote><?php } ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-5">
+                    <?php if (!empty($blog['image2'])) { ?><div class="mb-4"><img src="<?= h(media_url($blog['image2'])) ?>" alt="<?= h(value($blog, 'image2_alt')) ?>"></div><?php } ?>
+                    <?php if (!empty($blog['image3'])) { ?><div class="mb-4"><img src="<?= h(media_url($blog['image3'])) ?>" alt="<?= h(value($blog, 'image3_alt')) ?>"></div><?php } ?>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <?php render_site_footer(); ?>
+</div>
+<?php include __DIR__ . '/includes/scripts.php'; ?>
+</body>
+</html>

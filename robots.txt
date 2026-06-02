@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: http://localhost/rioadagency/rioadagency2/sitemap.xml

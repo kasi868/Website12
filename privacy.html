@@ -1,0 +1,21 @@
+<?php
+require_once __DIR__ . '/config/bootstrap.php';
+require_once __DIR__ . '/includes/layout.php';
+$page = fetch_page($conn, 'privacy');
+$contentSection = fetch_section($conn, 'privacy', 'content');
+$metaTitle = value($page, 'meta_title', 'Privacy Policy | RIO AD Agency');
+$metaDescription = value($page, 'meta_description', 'Privacy policy for RIO AD Agency.');
+$fallback = '<p>We respect your privacy and are committed to protecting the information you share with RIO AD Agency. Information submitted through contact forms or lead forms is used only for communication, service follow-up, and project-related discussions. We do not sell or misuse personal information.</p><p>You may contact us at any time if you want to update or remove your data from our records.</p>';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head><?php include __DIR__ . '/includes/head-common.php'; ?></head>
+<body>
+<div class="page-wrapper">
+   <?php include __DIR__ . '/includes/header.php'; ?>
+    <section class="blog-details"><div class="container"><div class="row"><div class="col-xl-12"><div class="blog-details__content"><?= render_content(value($contentSection, 'content', $fallback)) ?></div></div></div></div></section>
+    <?php render_site_footer(); ?>
+</div>
+<?php include __DIR__ . '/includes/scripts.php'; ?>
+</body>
+</html>
