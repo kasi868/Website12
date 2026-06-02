@@ -25,7 +25,7 @@ $fallback = '<p>By using the RIO AD Agency website, you agree to use the content
                         <h1><?= h($bannerTitle) ?></h1>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb gap-3">
-                                <li class="breadcrumb-item"><a href="<?= h(page_url('home')) ?>">Home</a></li>
+                                <li class="breadcrumb-item"><a href="<?= h(get_home_url()) ?>">Home</a></li>
                                 <li class="breadcrumb-item active" aria-current="page"><?= h($bannerTitle) ?></li>
                             </ol>
                         </nav>

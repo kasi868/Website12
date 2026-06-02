@@ -136,6 +136,7 @@ if (!function_exists('cms_run_schema_updates')) {
     cms_add_column_if_missing($conn, 'pages', 'sort_order', "INT(11) NOT NULL DEFAULT 0 AFTER `service_list_heading_tag`");
     cms_add_column_if_missing($conn, 'pages', 'is_active', "TINYINT(1) NOT NULL DEFAULT 1 AFTER `sort_order`");
     cms_add_column_if_missing($conn, 'pages', 'template_name', "VARCHAR(50) DEFAULT 'service' AFTER `is_active`");
+    cms_add_column_if_missing($conn, 'pages', 'page_type', "VARCHAR(50) DEFAULT 'page' AFTER `template_name`");
 
     cms_add_column_if_missing($conn, 'blogs', 'canonical_url', "VARCHAR(255) DEFAULT NULL AFTER `backlinks`");
     cms_add_column_if_missing($conn, 'blogs', 'title_heading_tag', "VARCHAR(10) DEFAULT 'h1' AFTER `canonical_url`");
@@ -212,6 +213,45 @@ if (!function_exists('cms_set_setting')) {
     }
 }
 
+if (!function_exists('cms_detect_base_path')) {
+    function cms_detect_base_path()
+    {
+        $script = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', $_SERVER['SCRIPT_NAME']) : '';
+        // Detect the directory where the script is located relative to document root
+        $base = rtrim(str_replace('\\', '/', dirname($script)), '/');
+
+        if ($base === '' || $base === '.') {
+            return '';
+        }
+
+        $entryPoints = [
+            '/config',
+            '/includes',
+            '/admin',
+        ];
+
+        foreach ($entryPoints as $entryPoint) {
+            if (substr($base, -strlen($entryPoint)) === $entryPoint) {
+                $base = substr($base, 0, -strlen($entryPoint));
+                break;
+            }
+        }
+        
+        if ($base === '/public_html' || $base === '/htdocs') {
+            $base = '';
+        }
+
+        return $base === '/' ? '' : $base;
+    }
+}
+
+if (!function_exists('cms_base_path')) {
+    function cms_base_path()
+    {
+        return defined('BASE_PATH') ? rtrim(BASE_PATH, '/') : cms_detect_base_path();
+    }
+}
+
 if (!function_exists('cms_base_url')) {
     function cms_base_url($conn = null)
     {
@@ -231,12 +271,43 @@ if (!function_exists('cms_base_url')) {
             return $baseUrl;
         }
 
-        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+            || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
         $scheme = $isHttps ? 'https' : 'http';
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-        $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : $scheme . '://' . $host;
+        $baseUrl = $scheme . '://' . $host . cms_base_path();
 
         return $baseUrl;
+    }
+}
+
+if (!function_exists('base_url')) {
+    function base_url($path = '')
+    {
+        $base = cms_base_url();
+        $path = trim((string) $path);
+
+        if ($path === '') {
+            return $base;
+        }
+
+        return rtrim($base, '/') . '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('cms_url_path')) {
+    function cms_url_path($path = '')
+    {
+        $path = trim((string) $path);
+        $path = $path === '' ? '' : '/' . ltrim($path, '/');
+        $basePath = cms_base_path();
+
+        if ($basePath !== '' && strpos($path, $basePath . '/') === 0) {
+            return $path;
+        }
+
+        return ($basePath !== '' ? $basePath : '') . $path;
     }
 }
 
@@ -281,7 +352,39 @@ if (!function_exists('cms_blog_url')) {
 if (!function_exists('page_url')) {
     function page_url($slug)
     {
-        return '/rioadagency/' . trim((string) $slug, '/');
+        $slug = trim((string) $slug);
+        $slug = ($slug === 'home') ? '' : $slug;
+
+        if ($slug === '') {
+            return cms_url_path('/');
+        }
+
+        if (preg_match('#^(https?:)?//#i', $slug) || strpos($slug, '#') === 0 || preg_match('#^(mailto|tel|javascript):#i', $slug)) {
+            return $slug;
+        }
+
+        $parts = parse_url($slug);
+        $path = isset($parts['path']) ? trim($parts['path'], '/') : '';
+        $path = preg_replace('/\.php$/i', '', $path);
+
+        if ($path === '') {
+            $url = cms_url_path('/');
+        } elseif (strpos($path, '/') !== false) {
+            $segments = array_map('cms_slugify', explode('/', $path));
+            $url = cms_url_path(implode('/', array_filter($segments)));
+        } else {
+            $url = get_page_url_by_slug($path);
+        }
+
+        if (!empty($parts['query'])) {
+            $url .= '?' . $parts['query'];
+        }
+
+        if (!empty($parts['fragment'])) {
+            $url .= '#' . $parts['fragment'];
+        }
+
+        return $url;
     }
 }
 
@@ -309,7 +412,19 @@ if (!function_exists('cms_link_url')) {
             return $url;
         }
 
-        $normalized = page_url($path);
+        $normalized = '';
+        global $conn;
+        if ($conn && strpos($path, '/') === false) {
+            $map = cms_page_link_map($conn);
+            $key = cms_slugify($path);
+            if (isset($map[$key])) {
+                $normalized = $map[$key];
+            }
+        }
+
+        if ($normalized === '') {
+            $normalized = page_url($path);
+        }
         if (!empty($parts['query'])) {
             $normalized .= '?' . $parts['query'];
         }
@@ -326,11 +441,7 @@ if (!function_exists('cms_page_url')) {
     {
         $slug = trim((string) $slug, '/');
 
-        if ($slug === '' || $slug === 'index') {
-            $path = page_url('home');
-        } else {
-            $path = page_url($slug);
-        }
+        $path = cms_url_path($slug === '' || $slug === 'index' ? '' : cms_slugify($slug));
 
         return $absolute ? cms_absolute_url($path, $conn) : $path;
     }
@@ -368,17 +479,7 @@ if (!function_exists('cms_fetch_page_by_id')) {
         $pageId = (int) $pageId;
         $result = mysqli_query($conn, "SELECT * FROM pages WHERE id=$pageId LIMIT 1");
 
-        if ($result && mysqli_num_rows($result) > 0) {
-            return mysqli_fetch_assoc($result);
-        }
-
-        foreach (cms_fetch_pages($conn, $activeOnly) as $page) {
-            if (cms_page_template($page) === $template) {
-                return $page;
-            }
-        }
-
-        return null;
+        return $result ? mysqli_fetch_assoc($result) : null;
     }
 }
 
@@ -396,9 +497,25 @@ if (!function_exists('cms_fetch_page_by_slug')) {
 if (!function_exists('cms_fetch_page_by_template')) {
     function cms_fetch_page_by_template(mysqli $conn, $template, $activeOnly = true)
     {
-        $template = mysqli_real_escape_string($conn, cms_normalize_template_name($template));
+        $template = cms_normalize_template_name($template);
+        $aliases = [$template];
+        if ($template === 'blog') {
+            $aliases[] = 'blogs';
+        }
+        if ($template === 'terms-conditions') {
+            $aliases[] = 'terms';
+        }
+
+        $aliases = array_unique(array_map(function ($alias) use ($conn) {
+            return "'" . mysqli_real_escape_string($conn, cms_slugify($alias)) . "'";
+        }, $aliases));
+        
+        if (!cms_column_exists($conn, 'pages', 'template_name')) {
+            return cms_fetch_page_by_slug($conn, $template, $activeOnly);
+        }
+
         $statusSql = $activeOnly ? cms_page_status_sql($conn) : '';
-        $result = mysqli_query($conn, "SELECT * FROM pages WHERE template_name='$template'$statusSql ORDER BY sort_order ASC, id ASC LIMIT 1");
+        $result = mysqli_query($conn, "SELECT * FROM pages WHERE template_name IN (" . implode(',', $aliases) . ")$statusSql ORDER BY sort_order ASC, id ASC LIMIT 1");
 
         return $result ? mysqli_fetch_assoc($result) : null;
     }
@@ -447,50 +564,7 @@ if (!function_exists('cms_template_file_map')) {
 if (!function_exists('cms_page_template')) {
     function cms_page_template($page)
     {
-        $template = cms_normalize_template_name(value($page, 'template_name'));
-        $slug = cms_slugify(value($page, 'slug'));
-        $name = cms_slugify(value($page, 'page_name'));
-        $knownTemplates = array_keys(cms_template_file_map());
-        $nameMap = [
-            'home' => 'home',
-            'about' => 'about',
-            'about-us' => 'about',
-            'portfolio' => 'portfolio',
-            'contact' => 'contact',
-            'contact-us' => 'contact',
-            'website-development' => 'web',
-            'web-development' => 'web',
-            'seo' => 'seo',
-            'search-engine-optimization' => 'seo',
-            'social-media-management' => 'social',
-            'social-media-marketing' => 'social',
-            'graphic-design' => 'graphic',
-            'brand-identity-logos' => 'brand',
-            'brand-identity-logo' => 'brand',
-            'brand' => 'brand',
-            'industrial-documentaries' => 'industrial',
-            'influencer-marketing' => 'influence',
-            'influence' => 'influence',
-            'product-photo-videography' => 'product',
-            'product-food-marketing' => 'product',
-            'privacy-policy' => 'privacy',
-            'privacy' => 'privacy',
-            'terms-conditions' => 'terms-conditions',
-            'terms-and-conditions' => 'terms-conditions',
-            'blogs' => 'blog',
-            'blog' => 'blog',
-            'google-adwords' => 'google',
-        ];
-
-        if ($template !== '' && !in_array($template, ['default', 'service', 'page'], true)) {
-            return $template;
-        }
-
-        if (in_array($slug, $knownTemplates, true)) {
-            return cms_normalize_template_name($slug);
-        }
-
-        return isset($nameMap[$name]) ? $nameMap[$name] : $template;
+        return cms_normalize_template_name(value($page, 'template_name', 'page'));
     }
 }
 
@@ -520,66 +594,101 @@ if (!function_exists('cms_navigation_pages')) {
     function cms_navigation_pages(mysqli $conn, $group = 'main')
     {
         $group = $group === 'service' ? 'service' : 'main';
-        $fallbacks = [
-            'main' => [
-                ['slug' => 'home', 'label' => 'Home'],
-                ['slug' => 'about', 'label' => 'About Us'],
-                ['slug' => 'portfolio', 'label' => 'Portfolio'],
-                ['slug' => 'blog', 'label' => 'Blogs'],
-                ['slug' => 'contact', 'label' => 'Contact Us'],
-            ],
-            'service' => [
-                ['slug' => 'web', 'label' => 'Website Development'],
-                ['slug' => 'seo', 'label' => 'SEO (Search Engine Optimization)'],
-                ['slug' => 'social', 'label' => 'Social Media Management'],
-                ['slug' => 'influence', 'label' => 'Influencer Marketing'],
-                ['slug' => 'google', 'label' => 'Google AdWords'],
-                ['slug' => 'product', 'label' => 'Product Photo & Videography'],
-                ['slug' => 'industrial', 'label' => 'Industrial Documentaries'],
-                ['slug' => 'brand', 'label' => 'Brand Identity & Logos'],
-                ['slug' => 'graphic', 'label' => 'Graphic Design'],
-            ],
-        ];
 
         if (!cms_table_exists($conn, 'pages')) {
-            return $fallbacks[$group];
+            return [];
         }
 
-        $templateColumn = cms_column_exists($conn, 'pages', 'template_name') ? 'template_name' : "'' AS template_name";
-        $statusSql = cms_column_exists($conn, 'pages', 'is_active') ? 'WHERE IFNULL(is_active, 1) = 1' : '';
-        $pages = fetch_all_assoc(mysqli_query($conn, "SELECT id, slug, page_name, $templateColumn FROM pages $statusSql ORDER BY sort_order ASC, id ASC"));
+        $hasTpl = cms_column_exists($conn, 'pages', 'template_name');
+        $hasType = cms_column_exists($conn, 'pages', 'page_type');
+        $hasActive = cms_column_exists($conn, 'pages', 'is_active');
+        $hasOrder = cms_column_exists($conn, 'pages', 'sort_order');
+
+        $templateColumn = $hasTpl ? 'template_name' : "'' AS template_name";
+        $pageTypeColumn = $hasType ? 'page_type' : "'' AS page_type";
+        $statusSql = $hasActive ? 'WHERE IFNULL(is_active, 1) = 1' : 'WHERE 1=1';
+        $orderSql = $hasOrder ? 'ORDER BY sort_order ASC, id ASC' : 'ORDER BY id ASC';
+
+        $query = "SELECT id, slug, page_name, $templateColumn, $pageTypeColumn FROM pages $statusSql $orderSql";
+        $res = mysqli_query($conn, $query);
+        
+        if (!$res) {
+            error_log("CMS Navigation Query Failed: " . mysqli_error($conn));
+            // Emergency fallbacks if DB is completely broken
+            return $group === 'main' ? [
+                ['slug' => '', 'label' => 'Home', 'template_name' => 'home'],
+                ['slug' => 'about', 'label' => 'About Us', 'template_name' => 'about'],
+                ['slug' => 'portfolio', 'label' => 'Portfolio', 'template_name' => 'portfolio'],
+                ['slug' => 'blogs', 'label' => 'Blogs', 'template_name' => 'blog'],
+                ['slug' => 'contact', 'label' => 'Contact Us', 'template_name' => 'contact']
+            ] : [];
+        }
+
+        $pages = fetch_all_assoc($res);
         $items = [];
-        $mainTemplates = ['home', 'about', 'portfolio', 'blog', 'blogs', 'contact'];
-        $serviceTemplates = ['web', 'seo', 'social', 'influence', 'google', 'product', 'industrial', 'brand', 'graphic'];
+        
+        if ($group === 'main') {
+            $order = ['home', 'about', 'portfolio', 'blog', 'contact'];
+            $labels = ['home' => 'Home', 'about' => 'About Us', 'portfolio' => 'Portfolio', 'blog' => 'Blogs', 'contact' => 'Contact Us'];
+            $map = [];
 
-        foreach ($pages as $page) {
-            $slug = value($page, 'slug');
-            $label = value($page, 'page_name', ucwords(str_replace('-', ' ', $slug)));
-            $labelKey = cms_slugify($label);
-            $template = cms_page_template($page);
-            $isMain = in_array($template, $mainTemplates, true) || in_array($labelKey, ['home', 'about-us', 'portfolio', 'blog', 'blogs', 'contact-us', 'contact'], true);
-            $isService = in_array($template, $serviceTemplates, true) || ($template === 'service' && !$isMain);
-
-            if ($group === 'service' && !$isService) {
-                continue;
+            foreach ($pages as $p) {
+                $tpl = cms_normalize_template_name(value($p, 'template_name'));
+                if (in_array($tpl, $order)) {
+                    $map[$tpl] = [
+                        'id' => $p['id'],
+                        'slug' => $p['slug'],
+                        'label' => $labels[$tpl],
+                        'template_name' => $tpl
+                    ];
+                }
             }
 
-            if ($group === 'main' && !$isMain) {
-                continue;
+            foreach ($order as $tpl) {
+                if (isset($map[$tpl])) $items[] = $map[$tpl];
             }
-
-            if (in_array($slug, ['site-settings', 'privacy', 'terms-conditions'], true)) {
-                continue;
+        } else {
+            // Service Navigation
+            $serviceTemplates = ['web', 'seo', 'social', 'influence', 'google', 'product', 'industrial', 'brand', 'graphic', 'video'];
+            $exclude = ['home', 'about', 'portfolio', 'blog', 'blogs', 'contact', 'privacy', 'terms', 'terms-conditions'];
+            
+            foreach ($pages as $p) {
+                $tpl = cms_normalize_template_name(value($p, 'template_name'));
+                $type = strtolower(value($p, 'page_type'));
+                
+                if (in_array($tpl, $serviceTemplates) || ($type === 'service' && !in_array($tpl, $exclude))) {
+                    $items[] = [
+                        'id' => $p['id'],
+                        'slug' => $p['slug'],
+                        'label' => $p['page_name'],
+                        'template_name' => $tpl
+                    ];
+                }
             }
-
-            $items[] = [
-                'id' => value($page, 'id'),
-                'slug' => $slug,
-                'label' => $label,
-            ];
         }
 
-        return $items ?: $fallbacks[$group];
+        return $items;
+    }
+}
+
+if (!function_exists('get_home_page')) {
+    function get_home_page($conn = null)
+    {
+        if (!$conn) global $conn;
+        $home = cms_fetch_page_by_template($conn, 'home', true);
+        if (!$home) {
+            error_log("CMS Routing Warning: Home page not found by template. Falling back to slug 'home'.");
+            $home = cms_fetch_page_by_slug($conn, 'home', true);
+        }
+        return $home;
+    }
+}
+
+if (!function_exists('get_home_url')) {
+    function get_home_url($conn = null)
+    {
+        $home = get_home_page($conn);
+        return $home ? page_url($home['slug']) : cms_url_path('/');
     }
 }
 
@@ -607,8 +716,8 @@ if (!function_exists('get_page_url_by_slug')) {
         }
 
         $slug = cms_slugify($slug);
-        if ($slug === '' || $slug === 'home' || $slug === 'index') {
-            return cms_page_url('home', $absolute, $conn);
+        if ($slug === '' || $slug === 'index') {
+            return cms_page_url('', $absolute, $conn);
         }
 
         if ($conn) {
@@ -763,9 +872,11 @@ if (!function_exists('cms_page_link_map')) {
             return $cache;
         }
 
+        $homePage = cms_fetch_page_by_template($conn, 'home', true);
+        $homeUrl = $homePage ? cms_page_url(value($homePage, 'slug')) : cms_url_path('/');
         $cache = [
-            'index' => cms_page_url('home'),
-            'home' => cms_page_url('home'),
+            'index' => $homeUrl,
+            'home' => $homeUrl,
         ];
 
         if (cms_table_exists($conn, 'pages')) {
@@ -1107,7 +1218,7 @@ if (!function_exists('media_url')) {
             return '';
         }
 
-        if (preg_match('/^(https?:)?\/\//i', $path)) {
+        if (preg_match('/^(https?:)?\/\//i', $path) || preg_match('/^(data|blob):/i', $path)) {
             return $path;
         }
 
@@ -1124,12 +1235,23 @@ if (!function_exists('media_url')) {
             }
         }
 
-        // Prepend BASE_URL to make it absolute
-        if (defined('BASE_URL')) {
-            return BASE_URL . ltrim($relativePath, '/');
+        return base_url($relativePath);
+    }
+}
+
+if (!function_exists('asset_url')) {
+    function asset_url($path)
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return '';
         }
 
-        return $relativePath;
+        if (preg_match('/^(https?:)?\/\//i', $path) || preg_match('/^(data|blob):/i', $path)) {
+            return $path;
+        }
+
+        return base_url($path);
     }
 }
 

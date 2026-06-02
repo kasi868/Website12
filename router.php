@@ -26,16 +26,6 @@ if (!$page) {
 }
 
 if (!$page) {
-    $templatePage = get_page_by_template($requestSlug, true, $conn);
-    if ($templatePage && value($templatePage, 'slug') !== $requestSlug) {
-        header('Location: ' . get_page_url(value($templatePage, 'id'), false, $conn), true, 301);
-        exit();
-    }
-
-    $page = $templatePage;
-}
-
-if (!$page) {
     http_response_code(404);
     require_once __DIR__ . '/includes/layout.php';
     include __DIR__ . '/includes/header.php';

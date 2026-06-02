@@ -9,6 +9,8 @@ function render_site_header($currentSlug, $isHome = false)
     $menuClass = $isHome ? 'main-menu main-menu-two clearfix' : 'main-menu main-menu-two clearfix';
     $stickyClass = $isHome ? 'stricky-header stricked-menu main-menu main-menu-two' : 'stricky-header stricked-menu main-menu';
     $logo = media_url(value($siteIdentity, 'image', 'assets/images/resources/rio-ad.png'));
+    $homeUrl = get_home_url();
+    $services = get_service_navigation();
     ?>
     <style>
         .main-menu.main-menu-two { 
@@ -152,7 +154,7 @@ function render_site_header($currentSlug, $isHome = false)
             
             <!-- Logo on Left -->
             <div style="flex: 0 0 auto; position: relative; z-index: 1001;">
-                <a href="<?= h(page_url('home')) ?>" style="text-decoration: none;">
+                <a href="<?= h($homeUrl) ?>" style="text-decoration: none;">
                     <img src="<?= h($logo) ?>" alt="RIO AD Agency" style="max-width: 180px; height: auto; display: block;">
                 </a>
             </div>
@@ -161,30 +163,29 @@ function render_site_header($currentSlug, $isHome = false)
             <nav style="flex: 1 1 auto; display: flex; justify-content: center; position: relative; z-index: 1001;">
                 <ul style="display: flex; align-items: center; justify-content: center; gap: 40px; list-style: none; margin: 0; padding: 0;">
                     <?php
-                    $nav = nav_items();
-                    foreach ($nav as $index => $item) {
-                        if ($index === 2) {
-                    ?>
-                    <li style="flex: 0 0 auto; position: relative;">
-                        <a href="#" style="display: inline-flex; align-items: center; padding: 10px 0; line-height: 1; font-size: 18px; font-weight: 500; color: #ffffff; text-decoration: none; font-family: 'Poppins', sans-serif;">Services</a>
-                        <ul style="position: absolute; top: 100%; left: 0; background: #1f1f25; list-style: none; margin: 0; padding: 10px 0; min-width: 250px; display: none;">
-                            <?php foreach (service_nav_items() as $sitem) { ?>
-                                <li style="padding: 8px 20px;">
-                                    <a href="<?= h(page_url($sitem['slug'])) ?>" style="color: #fff; text-decoration: none; font-size: 16px; display: block;"><?= h($sitem['label']) ?></a>
-                                </li>
-                            <?php } ?>
-                        </ul>
-                    </li>
-                    <?php
-                        }
+                    foreach (get_main_navigation() as $item) {
+                        $tpl = value($item, 'template_name');
                     ?>
                     <li class="<?= $currentSlug === $item['slug'] ? 'current' : '' ?>" style="flex: 0 0 auto;">
                         <a href="<?= h(page_url($item['slug'])) ?>" style="display: inline-flex; align-items: center; padding: 10px 0; line-height: 1; font-size: 18px; font-weight: 500; color: #ffffff; text-decoration: none; font-family: 'Poppins', sans-serif;"><?= h($item['label']) ?></a>
                     </li>
+                    <?php if ($tpl === 'about'): ?>
+                        <li style="flex: 0 0 auto; position: relative;">
+                            <a href="#" style="display: inline-flex; align-items: center; padding: 10px 0; line-height: 1; font-size: 18px; font-weight: 500; color: #ffffff; text-decoration: none; font-family: 'Poppins', sans-serif;">Services</a>
+                            <ul style="position: absolute; top: 100%; left: 0; background: #1f1f25; list-style: none; margin: 0; padding: 10px 0; min-width: 250px; display: none;">
+                                <?php foreach ($services as $sitem) { ?>
+                                    <li style="padding: 8px 20px;">
+                                        <a href="<?= h(page_url($sitem['slug'])) ?>" style="color: #fff; text-decoration: none; font-size: 16px; display: block;"><?= h($sitem['label']) ?></a>
+                                    </li>
+                                <?php } ?>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
                     <?php
                     }
                     ?>
-                    </nav>
+                </ul>
+            </nav>
 
                     <!-- Right side: contact and social -->
                     <div style="display:flex; align-items:center; gap:18px; flex:0 0 auto;">
@@ -251,13 +252,13 @@ function render_site_footer()
     ?>
     <footer class="site-footer">
         <div class="site-footer__top">
-            <div class="site-footer-top-bg" style="background-image: url(assets/images/backgrounds/site-footer-bg.jpg)"></div>
+            <div class="site-footer-top-bg" style="background-image: url(<?= h(media_url('assets/images/backgrounds/site-footer-bg.jpg')) ?>)"></div>
             <div class="container">
                 <div class="row">
                     <div class="col-xl-4 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="100ms">
                         <div class="footer-widget__column footer-widget__about">
                             <div class="footer-widget__about-logo">
-                                <a href="<?= h(page_url('home')) ?>"><img src="<?= h($logo) ?>" alt=""></a>
+                                <a href="<?= h(get_home_url()) ?>"><img src="<?= h($logo) ?>" alt=""></a>
                             </div>
                             <p class="footer-widget__about-text"><?= render_content(value($siteFooter, 'content', 'At RIO AD Agency in Hyderabad, we specialize in delivering creative advertising solutions that help businesses grow, stand out, and succeed in the digital era.')) ?></p>
                             <div class="footer-widget__about-social-list">
@@ -274,8 +275,8 @@ function render_site_footer()
                                 <?php foreach (nav_items() as $item) { ?>
                                     <li><a href="<?= h(page_url($item['slug'])) ?>"><?= h($item['label']) ?></a></li>
                                 <?php } ?>
-                                <li><a href="<?= h(page_url('terms-conditions')) ?>">Terms & conditions</a></li>
-                                <li><a href="<?= h(page_url('privacy')) ?>">Privacy & Policy</a></li>
+                                <li><a href="<?= h(get_page_url_by_template('terms-conditions')) ?>">Terms & conditions</a></li>
+                                <li><a href="<?= h(get_page_url_by_template('privacy')) ?>">Privacy & Policy</a></li>
                             </ul>
                         </div>
                     </div>
@@ -323,7 +324,7 @@ function render_site_footer()
             <span class="mobile-nav__close mobile-nav__toggler"></span>
 
             <div class="logo-box">
-                <a href="<?= h(page_url('home')) ?>" aria-label="logo image"><img src="<?= h($logo) ?>" width="155" alt="" /></a>
+                <a href="<?= h(get_home_url()) ?>" aria-label="logo image"><img src="<?= h($logo) ?>" width="155" alt="" /></a>
             </div>
             <div class="mobile-nav__container"></div>
 
@@ -388,7 +389,7 @@ function render_page_header($title, $breadcrumb, $backgroundImage = 'assets/imag
         <div class="container">
             <div class="page-header__inner">
                 <ul class="thm-breadcrumb list-unstyled">
-                    <li><a href="<?= h(page_url('home')) ?>">Home</a></li>
+                        <li><a href="<?= h(get_home_url()) ?>">Home</a></li>
                     <li><span>.</span></li>
                     <li><?= h($breadcrumb) ?></li>
                 </ul>

@@ -9,7 +9,7 @@ if (isset($_GET['slug'])) {
 }
 
 if (!$blog) {
-    header("Location: " . page_url('blogs'));
+    header("Location: " . get_page_url_by_template('blog'));
     exit();
 }
 
@@ -50,9 +50,9 @@ $month = date('M', strtotime(value($blog, 'created_at', 'now')));
             <div class="container">
                 <div class="page-header__inner">
                     <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="<?= h(page_url('home')) ?>">Home</a></li>
+                        <li><a href="<?= h(get_home_url()) ?>">Home</a></li>
                         <li><span>.</span></li>
-                        <li><a href="<?= h(page_url('blogs')) ?>">Blogs</a></li>
+                        <li><a href="<?= h(get_page_url_by_template('blog')) ?>">Blogs</a></li>
                         <li><span>.</span></li>
                         <li><?= h($bannerTitle) ?></li>
                     </ul>
@@ -147,7 +147,7 @@ $month = date('M', strtotime(value($blog, 'created_at', 'now')));
             <span class="mobile-nav__close mobile-nav__toggler"></span>
 
             <div class="logo-box">
-                <a href="<?= h(page_url('home')) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
+                <a href="<?= h(get_home_url()) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
             </div>
             <div class="mobile-nav__container"></div>
         </div>

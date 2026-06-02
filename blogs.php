@@ -30,7 +30,7 @@ $blogs = fetch_blogs($conn);
             <div class="container">
                 <div class="page-header__inner">
                     <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="<?= h(page_url('home')) ?>">Home</a></li>
+                        <li><a href="<?= h(get_home_url()) ?>">Home</a></li>
                         <li><span>.</span></li>
                         <li><?= h($bannerTitle) ?></li>
                     </ul>
@@ -102,7 +102,7 @@ $blogs = fetch_blogs($conn);
             <span class="mobile-nav__close mobile-nav__toggler"></span>
 
             <div class="logo-box">
-                <a href="<?= h(page_url('home')) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
+                <a href="<?= h(get_home_url()) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
             </div>
             <div class="mobile-nav__container"></div>
         </div>

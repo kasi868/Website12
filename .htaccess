@@ -1,8 +1,6 @@
 Options +FollowSymLinks -MultiViews
 RewriteEngine On
 
-RewriteBase /rioadagency/
-
 # Home page
 RewriteRule ^$ router.php [L,QSA]
 

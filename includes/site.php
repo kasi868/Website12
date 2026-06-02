@@ -10,13 +10,14 @@ $siteSocialLinks = cms_get_social_links($conn);
 function nav_items()
 {
     global $conn;
-
     return cms_navigation_pages($conn, 'main');
 }
 
 function service_nav_items()
 {
     global $conn;
-
     return cms_navigation_pages($conn, 'service');
 }
+
+function get_main_navigation() { return nav_items(); }
+function get_service_navigation() { return service_nav_items(); }

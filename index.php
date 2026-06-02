@@ -61,12 +61,12 @@ $extraStyles = '<style>
         <?php include __DIR__ . '/includes/header.php'; ?>
 
         <div id="content-desktop">
-            <video autoplay muted loop playsinline width="100%" height="auto">
+            <video autoplay muted loop playsinline preload="metadata" width="100%" height="auto">
                 <source src="<?= h(media_url(value($hero, 'image', 'assets/desktop.mp4'))) ?>" type="video/mp4">
             </video>
         </div>
         <div class="video-layer" id="content-mobile">
-            <video autoplay muted loop playsinline>
+            <video autoplay muted loop playsinline preload="metadata">
                 <source src="<?= h(media_url(value($hero, 'button_link', 'assets/mobile.mp4'))) ?>" type="video/mp4">
             </video>
         </div>

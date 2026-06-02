@@ -1,44 +1,37 @@
+<?php
+$homeUrl = get_home_url();
+$mainNav = get_main_navigation();
+$services = get_service_navigation();
+?>
 <header class="main-header-two clearfix">
     <nav class="main-menu main-menu-two clearfix">
         <div class="main-menu-two-wrapper clearfix">
             <div class="main-menu-two-wrapper__left">
                 <div class="main-menu-two-wrapper__logo">
-                    <a href="<?= h(page_url('home')) ?>"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" alt="RIO AD Agency"></a>
+                    <a href="<?= h($homeUrl) ?>"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" alt="RIO AD Agency"></a>
                 </div>
                 <div class="main-menu-two-wrapper__main-menu">
                     <a href="#" class="mobile-nav__toggler">
                         <span></span>
                     </a>
                     <ul class="main-menu__list">
-                        <?php
-                        $mainNavItems = [];
-                        foreach (nav_items() as $item) {
-                            if (value($item, 'slug') === 'home') {
-                                continue;
-                            }
-                            $mainNavItems[] = $item;
-                        }
-
-                        $firstMainItem = array_shift($mainNavItems);
-                        if ($firstMainItem) {
+                        <?php foreach ($mainNav as $item): 
+                            $tpl = value($item, 'template_name');
                         ?>
-                            <li class=" ">
-                                <a href="<?= h(page_url($firstMainItem['slug'])) ?>"><?= h($firstMainItem['label']) ?></a>
-                            </li>
-                        <?php } ?>
-                        <li class="dropdown">
-                            <a href="#">Services </a>
-                            <ul>
-                                <?php foreach (service_nav_items() as $item) { ?>
-                                    <li><a href="<?= h(page_url($item['slug'])) ?>"><?= h($item['label']) ?></a></li>
-                                <?php } ?>
-                            </ul>
-                        </li>
-                        <?php foreach ($mainNavItems as $item) { ?>
                             <li class=" ">
                                 <a href="<?= h(page_url($item['slug'])) ?>"><?= h($item['label']) ?></a>
                             </li>
-                        <?php } ?>
+                            <?php if ($tpl === 'about'): ?>
+                                <li class="dropdown">
+                                    <a href="#">Services </a>
+                                    <ul>
+                                        <?php foreach ($services as $sitem) { ?>
+                                            <li><a href="<?= h(page_url($sitem['slug'])) ?>"><?= h($sitem['label']) ?></a></li>
+                                        <?php } ?>
+                                    </ul>
+                                </li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
             </div>
