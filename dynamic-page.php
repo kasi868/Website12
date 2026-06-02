@@ -5,22 +5,38 @@ require_once __DIR__ . '/includes/layout.php';
 $pageSlug = isset($_GET['slug']) ? cms_slugify($_GET['slug']) : '';
 
 if ($pageSlug === '') {
-    header("Location: " . page_file('home'));
+    header("Location: " . page_url('home'));
     exit();
 }
 
-$page = fetch_page($conn, $pageSlug);
+$page = cms_fetch_page_by_slug($conn, $pageSlug, true);
+
+if (!$page) {
+    $redirect = cms_resolve_page_redirect($conn, $pageSlug);
+    if ($redirect) {
+        header("Location: " . get_page_url_by_slug(value($redirect, 'new_slug'), false, $conn), true, 301);
+        exit();
+    }
+}
 
 if (!$page) {
     http_response_code(404);
     include __DIR__ . '/includes/header.php';
     echo '<div class="container pt-120 pb-120"><h1>Page Not Found</h1><p>The requested page could not be found.</p></div>';
-    include __DIR__ . '/includes/footer.php';
+    render_site_footer();
     exit();
 }
 
 $metaTitle = value($page, 'meta_title', 'Page | RIO AD Agency');
 $metaDescription = value($page, 'meta_description', '');
+$canonicalUrl = get_page_url(value($page, 'id'), true, $conn);
+$openGraphUrl = $canonicalUrl;
+
+if (in_array(cms_slugify(value($page, 'page_name')), ['blog', 'blogs'], true) || in_array(strtolower(value($page, 'template_name')), ['blog', 'blogs'], true)) {
+    include __DIR__ . '/blogs.php';
+    exit();
+}
+
 $heroTitle = value($page, 'banner_title', value($page, 'page_name'));
 $bannerImage = media_url(value($page, 'banner_image', 'assets/images/backgrounds/main-slider-1-1.jpg'));
 $bannerHeadingTag = cms_heading_tag(value($page, 'banner_heading_tag', 'h1'), 'h1');
@@ -49,7 +65,7 @@ $socialLinks = cms_get_social_links($conn);
             <div class="container">
                 <div class="page-header__inner">
                     <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="<?= h(page_file('home')) ?>">Home</a></li>
+                        <li><a href="<?= h(page_url('home')) ?>">Home</a></li>
                         <li><span>.</span></li>
                         <li><?= h($heroTitle) ?></li>
                     </ul>
@@ -154,7 +170,7 @@ $socialLinks = cms_get_social_links($conn);
                                             }
                                         } ?>
                                     </ul>
-                                    <a href="<?= h(cms_e($pkg['booking_link'])) ?>" class="book-slot">Book Slot</a>
+                                    <a href="<?= h(cms_link_url(value($pkg, 'booking_link', '#'))) ?>" class="book-slot">Book Slot</a>
                                 </div>
                             <?php } ?>
                         </div>

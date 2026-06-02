@@ -2,8 +2,8 @@
 require_once __DIR__ . '/config/bootstrap.php';
 require_once __DIR__ . '/includes/layout.php';
 
-$pageSlug = 'blogs';
-$page = fetch_page($conn, $pageSlug);
+$pageSlug = isset($pageSlug) && $pageSlug !== '' ? $pageSlug : 'blogs';
+$page = isset($page) && is_array($page) ? $page : fetch_page($conn, $pageSlug);
 if (!$page) {
     $page = ['page_name' => 'Blogs', 'banner_title' => 'Our Blogs', 'meta_title' => 'Blogs | RIO AD Agency', 'meta_description' => 'Read our latest blogs about advertising and marketing.'];
 }
@@ -30,7 +30,7 @@ $blogs = fetch_blogs($conn);
             <div class="container">
                 <div class="page-header__inner">
                     <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="<?= h(page_file('home')) ?>">Home</a></li>
+                        <li><a href="<?= h(page_url('home')) ?>">Home</a></li>
                         <li><span>.</span></li>
                         <li><?= h($bannerTitle) ?></li>
                     </ul>
@@ -102,7 +102,7 @@ $blogs = fetch_blogs($conn);
             <span class="mobile-nav__close mobile-nav__toggler"></span>
 
             <div class="logo-box">
-                <a href="<?= h(page_file('home')) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
+                <a href="<?= h(page_url('home')) ?>" aria-label="logo image"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" width="155" alt="" /></a>
             </div>
             <div class="mobile-nav__container"></div>
         </div>

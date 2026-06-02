@@ -9,26 +9,14 @@ $siteSocialLinks = cms_get_social_links($conn);
 
 function nav_items()
 {
-    return [
-        ['slug' => 'home', 'label' => 'Home'],
-        ['slug' => 'about', 'label' => 'About Us'],
-        ['slug' => 'portfolio', 'label' => 'Portfolio'],
-        ['slug' => 'blog', 'label' => 'Blogs'],
-        ['slug' => 'contact', 'label' => 'Contact Us'],
-    ];
+    global $conn;
+
+    return cms_navigation_pages($conn, 'main');
 }
 
 function service_nav_items()
 {
-    return [
-        ['slug' => 'web', 'label' => 'Website Development'],
-        ['slug' => 'seo', 'label' => 'SEO (Search Engine Optimization)'],
-        ['slug' => 'social', 'label' => 'Social Media Management'],
-        ['slug' => 'influence', 'label' => 'Influencer Marketing'],
-        ['slug' => 'google', 'label' => 'Google AdWords'],
-        ['slug' => 'product', 'label' => 'Product Photo & Videography'],
-        ['slug' => 'industrial', 'label' => 'Industrial Documentaries'],
-        ['slug' => 'brand', 'label' => 'Brand Identity & Logos'],
-        ['slug' => 'portfolio', 'label' => 'Portfolio'],
-    ];
+    global $conn;
+
+    return cms_navigation_pages($conn, 'service');
 }

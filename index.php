@@ -123,7 +123,7 @@ $extraStyles = '<style>
                                             <span class="<?= h(value($service, 'icon_class', 'fa fa-star')) ?>"></span>
                                         </div>
                                         <div class="areas-of-practice__title">
-                                            <h3><a href="<?= h(value($service, 'link', '#')) ?>"><?= render_content(value($service, 'service_name')) ?></a></h3>
+                                            <h3><a href="<?= h(cms_link_url(value($service, 'link', '#'))) ?>"><?= render_content(value($service, 'service_name')) ?></a></h3>
                                         </div>
                                     </div>
                                     <span class="areas-of-practice__text no-hyphen" style="font-size: 15px;"><?= render_content(value($service, 'content')) ?></span>

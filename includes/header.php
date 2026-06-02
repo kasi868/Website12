@@ -3,40 +3,42 @@
         <div class="main-menu-two-wrapper clearfix">
             <div class="main-menu-two-wrapper__left">
                 <div class="main-menu-two-wrapper__logo">
-                    <a href="index"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" alt="RIO AD Agency"></a>
+                    <a href="<?= h(page_url('home')) ?>"><img src="<?= h(media_url('assets/images/resources/rio-ad.png')) ?>" alt="RIO AD Agency"></a>
                 </div>
                 <div class="main-menu-two-wrapper__main-menu">
                     <a href="#" class="mobile-nav__toggler">
                         <span></span>
                     </a>
                     <ul class="main-menu__list">
-                        <li class=" ">
-                            <a href="index">Home</a>
-                        </li>
-                        <li class=" ">
-                            <a href="about">About Us</a>
-                        </li>
+                        <?php
+                        $mainNavItems = [];
+                        foreach (nav_items() as $item) {
+                            if (value($item, 'slug') === 'home') {
+                                continue;
+                            }
+                            $mainNavItems[] = $item;
+                        }
+
+                        $firstMainItem = array_shift($mainNavItems);
+                        if ($firstMainItem) {
+                        ?>
+                            <li class=" ">
+                                <a href="<?= h(page_url($firstMainItem['slug'])) ?>"><?= h($firstMainItem['label']) ?></a>
+                            </li>
+                        <?php } ?>
                         <li class="dropdown">
                             <a href="#">Services </a>
                             <ul>
-                                <li><a href="web">Website Development</a></li>
-                                <li><a href="seo">SEO (Search Engine Optimization)</a></li>
-                                <li><a href="social">Social Media Management</a></li>
-                                <li><a href="influence">Influencer Marketing</a></li>
-                                <li><a href="google">Google AdWords</a></li>
-                                <li><a href="product">Product Photo & Videography</a></li>
-                                <li><a href="industrial">Industrial Documentaries</a></li>
-                                <li><a href="brand">Brand Identity & Logos</a></li>
-                                <li><a href="graphic">Graphic Design</a></li>
+                                <?php foreach (service_nav_items() as $item) { ?>
+                                    <li><a href="<?= h(page_url($item['slug'])) ?>"><?= h($item['label']) ?></a></li>
+                                <?php } ?>
                             </ul>
                         </li>
-                        <li class=" ">
-                            <a href="portfolio">Portfolio</a>
-                        </li>
-                        <li class=" ">
-                            <a href="blogs">Blogs</a>
-                        </li>
-                        <li><a href="contact">Contact Us</a></li>
+                        <?php foreach ($mainNavItems as $item) { ?>
+                            <li class=" ">
+                                <a href="<?= h(page_url($item['slug'])) ?>"><?= h($item['label']) ?></a>
+                            </li>
+                        <?php } ?>
                     </ul>
                 </div>
             </div>

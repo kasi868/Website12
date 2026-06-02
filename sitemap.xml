@@ -6,20 +6,134 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>http://localhost/blog/why-brand-consistency-matters/</loc>
-    <lastmod>2026-05-25T01:06:29+02:00</lastmod>
+    <loc>http://localhost/rioadagency/home123</loc>
+    <lastmod>2026-06-02T02:40:28+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/about-123</loc>
+    <lastmod>2026-06-02T02:28:39+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/portfolio123</loc>
+    <lastmod>2026-06-02T04:21:12+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/blog</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/contact</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/privacy</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/terms-conditions</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/web</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/seo</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/social-marketing</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/influencer-marketing-services-in-hyderabad</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/google</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/product-photography</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/industrial</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/brand</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/graphic</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/site-settings</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/video-photography</loc>
+    <lastmod>2026-06-02T02:21:07+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/blog/influencer-marketing-services-in-hyderabad</loc>
+    <lastmod>2026-05-25T06:10:24+02:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>http://localhost/blog/how-websites-support-sales/</loc>
-    <lastmod>2026-05-25T01:06:29+02:00</lastmod>
+    <loc>http://localhost/rioadagency/blog/why-brand-consistency-matters</loc>
+    <lastmod>2026-05-24T13:36:29+02:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>http://localhost/blog/social-media-for-local-brands/</loc>
-    <lastmod>2026-05-25T01:06:29+02:00</lastmod>
+    <loc>http://localhost/rioadagency/blog/how-websites-support-sales</loc>
+    <lastmod>2026-05-24T13:36:29+02:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/rioadagency/blog/social-media-for-local-brands</loc>
+    <lastmod>2026-05-24T13:36:29+02:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

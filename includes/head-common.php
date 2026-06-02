@@ -5,11 +5,28 @@ if (!isset($metaTitle)) {
 if (!isset($metaDescription)) {
     $metaDescription = '';
 }
+if (empty($canonicalUrl) && function_exists('cms_active_page')) {
+    $activePage = cms_active_page();
+    if ($activePage) {
+        $canonicalUrl = get_page_url(value($activePage, 'id'), true);
+        $openGraphUrl = $canonicalUrl;
+    }
+}
 ?>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title><?= h($metaTitle) ?></title>
 <meta name="description" content="<?= h($metaDescription) ?>">
+<?php if (!empty($canonicalUrl)) { ?>
+<link rel="canonical" href="<?= h($canonicalUrl) ?>">
+<meta property="og:url" content="<?= h(!empty($openGraphUrl) ? $openGraphUrl : $canonicalUrl) ?>">
+<script type="application/ld+json"><?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebPage',
+    'url' => $canonicalUrl,
+    'name' => $metaTitle,
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
+<?php } ?>
 <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_URL ?>assets/images/favicons/rio.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>assets/images/favicons/rio.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="<?= BASE_URL ?>assets/images/favicons/rio.png" />

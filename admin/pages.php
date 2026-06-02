@@ -78,6 +78,8 @@ if(isset($_POST['add_page'])) {
 // Handle Update Page
 if(isset($_POST['update_page'])) {
     $id = (int) $_POST['id'];
+    $existingPage = cms_fetch_page_by_id($conn, $id);
+    $oldSlug = $existingPage ? value($existingPage, 'slug') : '';
     $slug = ensureUniquePageSlug($conn, $_POST['slug'], $id);
     $page_name = mysqli_real_escape_string($conn, $_POST['page_name']);
     $banner_title = mysqli_real_escape_string($conn, $_POST['banner_title']);
@@ -118,6 +120,8 @@ if(isset($_POST['update_page'])) {
             $imageUpdate
             WHERE id=$id";
     if(mysqli_query($conn, $sql)) {
+        cms_save_page_redirect($conn, $id, $oldSlug, $slug);
+        cms_update_related_page_slugs($conn, $oldSlug, $slug);
         cms_generate_sitemap($conn);
         echo "<div class='alert alert-success'>Page updated successfully!</div>";
     } else {
@@ -250,7 +254,9 @@ $pages = mysqli_query($conn, "SELECT * FROM pages ORDER BY sort_order ASC, id AS
                                         <div class="col-md-4 mb-3">
                                             <label>Template</label>
                                             <select name="template_name" class="form-control">
-                                                <option value="service" <?= value($row, 'template_name', 'service') === 'service' ? 'selected' : '' ?>>Service</option>
+                                                <?php foreach (cms_template_file_map() as $templateKey => $templateFile) { ?>
+                                                    <option value="<?= h($templateKey) ?>" <?= cms_normalize_template_name(value($row, 'template_name', 'service')) === $templateKey ? 'selected' : '' ?>><?= h(ucwords(str_replace('-', ' ', $templateKey))) ?></option>
+                                                <?php } ?>
                                                 <option value="default" <?= value($row, 'template_name', 'service') === 'default' ? 'selected' : '' ?>>Default</option>
                                             </select>
                                         </div>
@@ -361,7 +367,9 @@ $pages = mysqli_query($conn, "SELECT * FROM pages ORDER BY sort_order ASC, id AS
                         <div class="col-md-4 mb-3">
                             <label>Template</label>
                             <select name="template_name" class="form-control">
-                                <option value="service" selected>Service</option>
+                                <?php foreach (cms_template_file_map() as $templateKey => $templateFile) { ?>
+                                    <option value="<?= h($templateKey) ?>"><?= h(ucwords(str_replace('-', ' ', $templateKey))) ?></option>
+                                <?php } ?>
                                 <option value="default">Default</option>
                             </select>
                         </div>
