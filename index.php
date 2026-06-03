@@ -6,6 +6,7 @@ $pageSlug = 'home';
 $page = fetch_page($conn, 'home');
 $about = fetch_section($conn, 'home', 'about_intro');
 $services = fetch_services($conn, 'home');
+
 $blogs = fetch_blogs($conn, 6);
 $portfolioImages = fetch_images($conn, 'home', 'home_portfolio');
 
@@ -30,7 +31,7 @@ $extraStyles = '<style>
 @media screen and (max-width: 991px) { 
     #content-desktop { display: none; } #content-mobile { display: block; } 
     .image-layer, .swiper-slide { position: relative; width: 100vw; height: 150vh; margin: 0; padding: 0; overflow: hidden; } 
-    .video-layer video { width: 100%; height: auto; object-fit: contain; top: 0; left: 0; transform: none; } 
+    .video-layer video { width: 100%; height: auto; object-fit: contain; top: 140px; left: 0; transform: none; } 
     .main-header-two { padding: 15px 0; }
     .main-menu-two-wrapper__logo { position: relative; z-index: 10; }
 }
@@ -73,7 +74,7 @@ $extraStyles = '<style>
 
         <br><br>
         <section class="build-business">
-            <div id="content-mobile"><br><br><br><br><br><br><br><br><br><br><br><br></div>
+            <div id="content-mobile"><br><br><br><br><br><br><br><br><br><br><br></div>
             <div class="container">
                 <div class="row">
                     <div class="col-xl-6">
@@ -115,7 +116,9 @@ $extraStyles = '<style>
                 </div>
                 <div class="areas-of-practice__bottom">
                     <div class="row">
-                        <?php foreach ($services as $service) { ?>
+                        <?php foreach ($services as $service) { 
+                            error_log('SERVICE NAME: ' . value($service, 'service_name'));
+                        ?>
                             <div class="col-xl-4 col-lg-6 col-md-6">
                                 <div class="areas-of-practice__single">
                                     <div class="areas-of-practice__icon-box">
@@ -123,10 +126,13 @@ $extraStyles = '<style>
                                             <span class="<?= h(value($service, 'icon_class', 'fa fa-star')) ?>"></span>
                                         </div>
                                         <div class="areas-of-practice__title">
-                                            <h3><a href="<?= h(cms_link_url(value($service, 'link', '#'))) ?>"><?= render_content(value($service, 'service_name')) ?></a></h3>
+                                            <h3>
+                                                <a href="<?= h(cms_link_url(value($service, 'slug', '#'))) ?>">
+                                                    <?= h(value($service, 'label', 'Service')) ?>
+                                                </a>
+                                            </h3>
                                         </div>
                                     </div>
-                                    <span class="areas-of-practice__text no-hyphen" style="font-size: 15px;"><?= render_content(value($service, 'content')) ?></span>
                                 </div>
                             </div>
                         <?php } ?>
